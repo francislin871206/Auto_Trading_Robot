@@ -1,5 +1,7 @@
-#5. 日誌和錯誤處理模組 (logger.py)
-#此模組負責記錄交易和錯誤信息。
+'''
+This function is responsible for recording trading and error messages.
+'''
+  
 import logging
 
 # Configure logging
