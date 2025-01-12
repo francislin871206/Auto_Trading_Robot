@@ -2,7 +2,7 @@
 Purpose: This module contains the core trading logic and calls functions from other modules to perform various operations.
 Function:
     - monitor_price_and_sell: Automatically monitors price and triggers sell orders based on stop-loss or take-profit conditions.
-    - trading_bot: function is the core of this trading system, responsible for automating the end-to-end trading process.
+    - trading_bot: The function is the core of this trading system, responsible for automating the end-to-end trading process.
 """
 
 from binance.client import Client
