@@ -1,9 +1,9 @@
-'''
+"""
 Purpose: This function is responsible for recording trading and error messages.
 Function: 
     - log_trade: Record informational messages related to trading activities, such as successful trades or key trading decisions.
     - log_error: Record error messages or issues encountered during the bot's operation.
-'''
+"""
   
 import logging
 
