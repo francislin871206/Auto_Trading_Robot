@@ -1,4 +1,12 @@
-# This module contains the logic for calculating technical indicators using pandas-ta and other technical analysis libraries.
+"""
+Purpose: This module contains the logic for calculating technical indicators using pandas-ta and other technical analysis libraries.
+Function:
+    - calculate_indicators: Calculate technical indicators for the given DataFrame.
+    - calculate_dynamic_atr: Calculate dynamic ATR-based thresholds for stop loss and take profit.
+    - check_breakout: Check if the current price has broken out above the resistance level.
+"""
+
+
 
 import pandas_ta as ta
 
