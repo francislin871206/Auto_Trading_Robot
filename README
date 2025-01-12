@@ -3,6 +3,9 @@ This project is self-learning project to use python programme build up my own cr
 The bot integrates APIs, technical indicators, and risk management to automate trading strategies to allow me not to monitor the price movement to gain everyday lunch money.
 I look forward to develop my coding skill and thinking whether utilize these engineering techniques at other commertial field,  such as healthcare investment portfolio management or so on.
 
+- Next Step：
+Try to use machine learning and reinforce learning skills to predcit the underlying price and generate more effective trading and risk management strategy.
+
 - Module List：
 ---- api_interface.py -> This module uses API techniques to manage market data retrieval, portfolio balance checks, and adaptive buy and sell orders with robust error handling and execution monitoring.
 ---- logger.py -> This module is responsible for recording trading and error messages.
