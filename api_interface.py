@@ -3,8 +3,8 @@ import pandas as pd
 import logger
 import time
 
-API_KEY = "Mzc11VjlGVTGcvS14rE4lqOO7ReTAilhESEt74KzBQKVcwrF9fOndggibojR3oNE"
-API_SECRET = "uNhDk5QblGGcNERNX3yNuhZWQODyrekBbtdDSkwGmisJvnnJUkARrtbay31krwEo"
+API_KEY = "My Own API_Key"
+API_SECRET = "My Own Secret_Code"
 
 client = Client(API_KEY, API_SECRET)
 
@@ -29,112 +29,109 @@ def get_historical_data(symbol, interval, limit=100):
 
 def get_current_balance(symbol):
     """
-    獲取指定幣種的餘額
+    Retrieve the balance of a specified asset.
     """
-  # 手動指定資產名稱（若只針對 ETH 交易）： 如果這段代碼僅針對 ETHUSDT，可以手動指定 asset 變量，直接將其設為 'ETH'
     balance = client.get_asset_balance(asset=symbol)
     return float(balance['free'])
 
-
 def place_buy_order(symbol, quantity, min_quantity=0.001, reduction_factor=0.5):
     """
-    試圖下買單 如果USDT餘額不足則逐步縮小交易量直到成功執行或達到最小交易量。
+    Attempt to place a buy order. If the USDT balance is insufficient, gradually reduce the order quantity until 
+    the order is successfully executed or the minimum tradeable amount is reached.
     """
-    # 獲取USDT餘額
+    # Get the USDT balance
     available_usdt_balance = get_current_balance("USDT")
     
-    # 獲取當前ETH/USDT的價格
+    # Get the current ETH/USDT price
     current_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
     
-    # 不斷嘗試縮小交易量，直到達到可用餘額限制
+    # Continuously try to reduce the order quantity until it meets the balance limit
     while quantity > min_quantity:
         try:
-            # 計算購買所需的USDT數量
+            # Calculate the required USDT for the order
             required_usdt = quantity * current_price
 
-            # 如果USDT餘額不足，則減少ETH購買數量
+            # If the USDT balance is insufficient, reduce the order quantity
             if available_usdt_balance < required_usdt:
                 logger.log_error(f"Insufficient USDT balance for buying {quantity} ETH. Reducing quantity...")
-                quantity *= reduction_factor  # 減少ETH購買數量
-                quantity = round(quantity, 3)  # 保留小數位數（根據交易所規定）
+                quantity *= reduction_factor
+                quantity = round(quantity, 3)  # Keep decimal places based on exchange requirements
                 continue
 
-            # 嘗試下單
+            # Attempt to place the order
             order = client.order_market_buy(symbol=symbol, quantity=quantity)
             
-            # 檢查是否成功成交
+            # Check if the order was successfully filled
             if order['status'] == 'FILLED':
                 actual_quantity = get_current_balance(symbol.replace('USDT', ''))
                 logger.log_trade(f"Order filled for {quantity} of {symbol}")
-                return actual_quantity  # 返回實際持有的數量
+                return actual_quantity
             else:
                 logger.log_error(f"Buy order for {symbol} not fully executed.")
-                return None  # 返回 None 表示交易失敗
+                return None
         except Exception as e:
             logger.log_error(f"Error in placing buy order for {quantity} of {symbol}: {e}")
-            quantity *= reduction_factor  # 再次減少交易量
-            quantity = round(quantity, 3)  # 保留小數位數
+            quantity *= reduction_factor
+            quantity = round(quantity, 3)
 
     logger.log_error("Unable to place buy order: quantity reduced below minimum limit.")
-    return None  # 當交易量小於最小值後退出
+    return None
 
 def place_sell_order(symbol, quantity, interval=2, max_retries=10):
     """
-    分批下市價賣單，遇到部分成交時重新嘗試賣出剩餘數量，以最大化避險效果。
+    Place market sell orders in batches, retrying if partially filled, to maximize hedging efficiency.
     """
     total_quantity = quantity
-    retries = 0  # 計數重試次數
+    retries = 0
     
     while total_quantity > 0 and retries < max_retries:
-        # 確定本次賣出數量
-        sell_quantity =  total_quantity
+        sell_quantity = total_quantity
         
         try:
-            # 下市價單
+            # Place a market sell order
             order = client.order_market_sell(symbol=symbol, quantity=sell_quantity)
             
-            # 檢查是否完全成交
+            # Check if the order was filled
             if order['status'] == 'FILLED':
                 logger.log_trade(f"Sold {sell_quantity} of {symbol}")
-                total_quantity -= sell_quantity  # 減少剩餘數量
-                retries = 0  # 重置重試計數，因為成交成功
+                total_quantity -= sell_quantity
+                retries = 0
             elif order['status'] == 'PARTIALLY_FILLED':
-                # 訂單部分成交，記錄並繼續重試剩餘部分
                 filled_quantity = float(order['executedQty'])
-                total_quantity -= filled_quantity  # 減少部分成交的數量
+                total_quantity -= filled_quantity
                 logger.log_error(f"Partial fill for {sell_quantity} of {symbol}, {filled_quantity} executed.")
             else:
-                # 如果完全未成交，增加重試計數
                 retries += 1
                 logger.log_error(f"No fill for {sell_quantity} of {symbol}. Retrying ({retries}/{max_retries})...")
             
         except Exception as e:
             logger.log_error(f"Error in placing sell order: {e}")
-            retries += 1  # 增加重試計數
+            retries += 1
         
-        # 等待 interval 秒後再嘗試下一批訂單
+        # Wait for the interval before retrying the next batch order
         time.sleep(interval)
 
     if total_quantity > 0:
         logger.log_error(f"Unable to complete full sell order. Remaining quantity: {total_quantity}")
 
-
 def check_order_status(symbol, order_id):
     """
-    持續輪詢檢查訂單狀態，直到訂單完全成交或放棄
+    Continuously poll the order status until the order is completely filled or abandoned.
     """
     while True:
         order = client.get_order(symbol=symbol, orderId=order_id)
         
-        # 檢查訂單狀態
+        # Check the order status
         if order['status'] == 'FILLED':
-            print(f"The order {order_id} is completely fullfilled")
+            print(f"The order {order_id} is completely filled")
             return True
         elif order['status'] == 'PARTIALLY_FILLED':
-            print(f"The order {order_id} is partially fullfilled, wait for completely fullfilling...")
+            print(f"The order {order_id} is partially filled, waiting for full completion...")
         else:
-            print(f"The order {order_id} isn't fullfilled, keep waiting...")
+            print(f"The order {order_id} isn't filled, continuing to wait...")
         
-        # 等待30秒後再次檢查
+        # Wait 30 seconds before checking again
         time.sleep(30)
+
+
 
