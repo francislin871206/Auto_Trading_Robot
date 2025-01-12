@@ -1,3 +1,13 @@
+"""
+Purpose: This module uses API techniques to manage market data retrieval, portfolio balance checks, and adaptive buy and sell orders with robust error handling and execution monitoring.
+Function:
+    -  get_historical_data: The function retrieves historical market data, such as k-line, for a specified cryptocurrency trading pair and formats it into DataFrame structure for analysis. 
+    -  get_current_balance: Retrieve the balance of a specified asset.
+    -  place_buy_order: Attempt to place a buy order. 
+                        If the USDT balance is insufficient, gradually reduce the order quantity until the order is successfully executed or the minimum tradeable amount is reached.
+    - place_sell_order: Place market sell orders in batches, retrying if partially filled, to maximize hedging efficiency.
+    - check_order_status: Continuously poll the order status until the order is completely filled or abandoned.
+"""
 from binance.client import Client
 import pandas as pd
 import logger
