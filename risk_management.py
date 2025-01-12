@@ -1,4 +1,10 @@
-# This module is responsible for position management and risk control.
+"""
+Purpose: This module is responsible for position management and risk control.
+Function: 
+    - calculate_position_size: Calculate position size based on account balance, entry price, stop loss distance, and leverage.
+    - should_enter_trade: Check if trading is allowed based on the current position state.
+    - update_position_status: Change the trading state to reflect whether a position is active or not.
+"""
 
 # Track position status globally
 in_position = True
