@@ -1,0 +1,11 @@
+- Introduction：
+This project is self-learning project to use python programme build up my own crypyto trading robot.
+The bot integrates APIs, technical indicators, and risk management to automate trading strategies to allow me not to monitor the price movement to gain everyday lunch money.
+I look forward to develop my coding skill and thinking whether utilize these engineering techniques at other commertial field,  such as healthcare investment portfolio management or so on.
+
+- Function List：
+---- api_interface.py -> This module uses API techniques to manage market data retrieval, portfolio balance checks, and adaptive buy and sell orders with robust error handling and execution monitoring.
+---- logger.py -> This module is responsible for recording trading and error messages.
+---- main_strategy.py -> This module contains the core trading logic and calls functions from other modules to perform various operations.
+---- risk_management.py -> This module is responsible for position management and risk control.
+---- technical_indicators.py -> This module contains the logic for calculating technical indicators using pandas-ta and other technical analysis libraries.
